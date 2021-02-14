@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { User } = require('./models/user');
 const config = require('./config/key');
+const { auth } = require('./middleware/auth');
 
 // application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -26,7 +27,7 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.js');
 })
 
-app.post('/register', (req, res) => {
+app.post('/api/user/register', (req, res) => {
     // 회원 가입시 필요 정보를 client에서 가져오기
     // 그것들을 데이터베이스에 입력
     const user = new User(req.body);
@@ -37,7 +38,7 @@ app.post('/register', (req, res) => {
     });
 })
 
-app.post('/login', (req, res) => {
+app.post('/api/user/login', (req, res) => {
     // callback function 호출 위치와 인자를 잘 생각해야될 듯
     
     // 요청된 이메일을 데이터베이스에서 있는지 찾는다.
@@ -71,6 +72,33 @@ app.post('/login', (req, res) => {
             });
         });
     });
+})
+
+app.get('/api/user/logout', auth, (req, res) => {
+    // id로 찾아서 token 삭제
+    User.findOneAndUpdate({ _id: req.user._id },
+        { token: "" }, (err, user) => {
+            if (err) return res.json({ success: false, err });
+            return res.status(200).send({ success: true })
+        }
+    );
+})
+
+// 여기서 auth는 미드웨어, get리퀘스트를 받고
+// 콜백을 하기 전에 진행하는 작업
+app.get('/api/user/auth', auth, (req, res) => {
+    // 미들웨어 통과 성공, auth 통과 성공
+
+    res.status(200).json({
+        __id: req.user._id,
+        isAdmin: req.user.role === 0 ? false : true,
+        isAuth: true,
+        email: req.user.email,
+        name: req.user.name,
+        lastname: req.user.lastname,
+        role: req.user.role,
+        image: req.user.image
+    })
 })
 
 app.listen(port,() => {
