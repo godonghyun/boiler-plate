@@ -82,7 +82,9 @@ app.get('/api/user/logout', auth, (req, res) => {
     User.findOneAndUpdate({ _id: req.user._id },
         { token: "" }, (err, user) => {
             if (err) return res.json({ success: false, err });
-            return res.status(200).send({ success: true })
+            
+            
+            return res.clearCookie("x_auth").status(200).send({ success: true })
         }
     );
 })
@@ -104,7 +106,7 @@ app.get('/api/user/auth', auth, (req, res) => {
     })
 })
 
-const port = 8080;
+const port = 5000;
 app.listen(port,() => {
     console.log(`listening on port ${port}`); 
 })
