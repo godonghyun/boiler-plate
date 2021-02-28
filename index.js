@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-const port = 8080;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { User } = require('./models/user');
@@ -25,6 +24,10 @@ mongoose.connect(config.mongoURI, {
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.js');
+})
+
+app.get('/api/hello', (req, res) => {
+    res.send('안녕하세요');
 })
 
 app.post('/api/user/register', (req, res) => {
@@ -101,6 +104,7 @@ app.get('/api/user/auth', auth, (req, res) => {
     })
 })
 
+const port = 8080;
 app.listen(port,() => {
-    console.log("hello this is my server");
+    console.log(`listening on port ${port}`); 
 })
